@@ -1,13 +1,13 @@
 # 代码地图
 
-> `backend/`（含 `seed/`）已创建；`frontend/` 已落地账号页、科目选择/章节练习/随机练习与真题模拟考试（`routes`/`features/auth`/`features/practice`/`features/exam`/`components`/`api`/`stores`），其余目录随后续阶段落地。
+> `backend/`（含 `seed/`）与 `frontend/` 全部模块均已落地：账号、科目选择/章节练习/随机练习、真题模拟、错题本（列表+重刷）、收藏、统计。
 
 ## 树
 
 ```text
 frontend/                 # React SPA（Vite+ 工具链）
   src/
-    routes/               # 路由页面：登录/注册、科目选择、章节练习、随机练习、真题模拟、错题本、收藏、统计
+    routes/               # 路由装配（AppRoutes）、登录守卫（RequireAuth）、科目选择页；功能页在 features/
     features/             # 按业务域拆分（域内组件/hooks/类型就近放）
       auth/               # 注册/登录、token 管理
       practice/           # 顺序/随机刷题、逐题判分
@@ -34,21 +34,26 @@ backend/                  # Go REST API（Gin + GORM + SQLite）
 
 | 模块 | 路径 | 职责 | 主要入口 |
 | --- | --- | --- | --- |
-| 前端应用 | `frontend/src/routes` | 页面与路由 | `AppRoutes.tsx` |
+| 前端应用 | `frontend/src/routes` | 路由装配、登录守卫与科目选择页（功能页在 features/） | `AppRoutes.tsx` |
 | 业务域组件 | `frontend/src/features/*` | 各业务域 UI 与交互 | 域内 index |
+| 通用组件 | `frontend/src/components` | 跨域复用：题目卡片、选项组、答题卡、分页条 | `QuestionCard.tsx` |
 | API 客户端 | `frontend/src/api` | 封装全部后端调用 | `client.ts` |
+| 客户端状态 | `frontend/src/stores` | zustand：登录态、练习会话、考试作答 | `auth.ts` |
 | API 服务 | `backend/cmd/server` | 进程入口、路由装配 | `main.go` |
 | 接口层 | `backend/internal/handler` | REST 端点 | 各 handler 文件 |
 | 业务层 | `backend/internal/service` | 判分/错题/统计/JWT | 各 service 文件 |
 | 数据层 | `backend/internal/repository` | GORM CRUD | 各 repository 文件 |
+| 表模型 | `backend/internal/model` | GORM 表模型：user/subject/question/paper/exam/mistake/favorite 等 | 各 model 文件 |
+| 中间件 | `backend/internal/middleware` | JWT 鉴权、slog 请求日志 | 各 middleware 文件 |
 | 题库种子 | `backend/seed` | 题库 JSON 与幂等导入 | `Import`（启动时由 `cmd/server` 调用） |
 
 ## 依赖
 
 ```mermaid
 graph TD
-  Routes[routes 页面] --> Features[features/* 业务域]
+  Routes[routes 路由装配/守卫] --> Features[features/* 业务域]
   Routes --> Components[components 通用组件]
+  Features --> Components
   Features --> Api[api 客户端]
   Features --> Stores[stores]
   Api --> API["backend /api/v1"]

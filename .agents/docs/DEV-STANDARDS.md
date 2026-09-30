@@ -7,7 +7,7 @@
 
 ## 目录与代码结构
 
-- 前端：页面放 `src/routes/`；按业务域拆 `src/features/<domain>/`，域内组件/hooks/类型就近放；跨域复用组件进 `src/components/`；所有后端调用集中在 `src/api/`
+- 前端：功能页放 `src/features/<domain>/`，域内组件/hooks/类型就近放；`src/routes/` 只放路由装配、登录守卫与科目选择页；跨域复用组件进 `src/components/`；所有后端调用集中在 `src/api/`
 - 后端：`cmd/server/` 只放入口装配；`internal/handler`（参数校验/响应）→ `internal/service`（业务）→ `internal/repository`（GORM 访问）；handler 不越过 service 直接触达 repository
 
 ## 代码风格
