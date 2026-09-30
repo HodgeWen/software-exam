@@ -1,6 +1,6 @@
 # 代码地图
 
-> `backend/` 已创建（不含 `seed/`）；`frontend/` 仍为规划目录，尚未创建。
+> `backend/`（含 `seed/`）已创建；`frontend/` 已创建底座与账号页（`routes`/`features/auth`/`api`/`stores`），其余目录随后续阶段落地。
 
 ## 树
 
@@ -34,14 +34,14 @@ backend/                  # Go REST API（Gin + GORM + SQLite）
 
 | 模块 | 路径 | 职责 | 主要入口 |
 | --- | --- | --- | --- |
-| 前端应用 | `frontend/src/routes` | 页面与路由 | 路由树根组件 |
+| 前端应用 | `frontend/src/routes` | 页面与路由 | `AppRoutes.tsx` |
 | 业务域组件 | `frontend/src/features/*` | 各业务域 UI 与交互 | 域内 index |
 | API 客户端 | `frontend/src/api` | 封装全部后端调用 | `client.ts` |
 | API 服务 | `backend/cmd/server` | 进程入口、路由装配 | `main.go` |
 | 接口层 | `backend/internal/handler` | REST 端点 | 各 handler 文件 |
 | 业务层 | `backend/internal/service` | 判分/错题/统计/JWT | 各 service 文件 |
 | 数据层 | `backend/internal/repository` | GORM CRUD | 各 repository 文件 |
-| 题库种子 | `backend/seed` | 题库 JSON 与导入 | 导入命令 |
+| 题库种子 | `backend/seed` | 题库 JSON 与幂等导入 | `Import`（启动时由 `cmd/server` 调用） |
 
 ## 依赖
 
@@ -58,5 +58,5 @@ graph TD
 
 ## 关键路径
 
-- 启动：`backend/cmd/server` 打开 SQLite → AutoMigrate → 注册中间件与路由 → 监听；前端 `vp dev` 起 Vite 开发服务器并代理 `/api` 到后端
+- 启动：`backend/cmd/server` 打开 SQLite → AutoMigrate → 幂等种子导入 → 注册中间件与路由 → 监听；前端 `vp dev` 起 Vite 开发服务器并代理 `/api` 到后端
 - 答题请求：routes → features → api →（HTTP `/api/v1`）→ middleware(JWT) → handler → service(判分/沉淀错题) → repository → SQLite
