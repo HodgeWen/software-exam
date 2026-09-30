@@ -17,9 +17,14 @@ func NewRouter(db *gorm.DB, jwtSecret []byte) *gin.Engine {
 	auth := NewAuthHandler(service.NewAuthService(repository.NewUserRepository(db), jwtSecret))
 	bank := NewBankHandler(service.NewBankService(repository.NewBankRepository(db)))
 	mistakeRepo := repository.NewMistakeRepository(db)
-	answers := NewAnswerHandler(service.NewAnswerService(
-		repository.NewQuestionRepository(db), repository.NewAnswerRecordRepository(db), mistakeRepo))
+	answerService := service.NewAnswerService(
+		repository.NewQuestionRepository(db), repository.NewAnswerRecordRepository(db), mistakeRepo)
+	answers := NewAnswerHandler(answerService)
+	exams := NewExamHandler(service.NewExamService(
+		repository.NewBankRepository(db), repository.NewExamRepository(db), answerService))
 	mistakes := NewMistakeHandler(service.NewMistakeService(mistakeRepo))
+	favorites := NewFavoriteHandler(service.NewFavoriteService(repository.NewFavoriteRepository(db)))
+	stats := NewStatsHandler(service.NewStatsService(repository.NewAnswerRecordRepository(db)))
 
 	v1 := r.Group("/api/v1")
 	v1.GET("/health", Health)
@@ -47,6 +52,16 @@ func NewRouter(db *gorm.DB, jwtSecret []byte) *gin.Engine {
 	protected.GET("/mistakes", mistakes.List)
 	protected.GET("/mistakes/questions", mistakes.Questions)
 	protected.DELETE("/mistakes/:questionId", mistakes.Remove)
+
+	// 真题模拟考试：开始与交卷
+	protected.POST("/exams", exams.Start)
+	protected.POST("/exams/:id/submit", exams.Submit)
+
+	// 收藏与刷题统计
+	protected.POST("/favorites", favorites.Add)
+	protected.GET("/favorites", favorites.List)
+	protected.DELETE("/favorites/:questionId", favorites.Remove)
+	protected.GET("/stats", stats.Summary)
 
 	return r
 }

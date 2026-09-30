@@ -17,7 +17,7 @@ func newAnswerTestServer(t *testing.T) (*httptest.Server, *gorm.DB) {
 	ts, db := newTestServer(t)
 	if err := db.AutoMigrate(
 		&model.Subject{}, &model.Chapter{}, &model.Question{},
-		&model.AnswerRecord{}, &model.Mistake{},
+		&model.AnswerRecord{}, &model.Mistake{}, &model.Favorite{},
 	); err != nil {
 		t.Fatalf("迁移判分相关表: %v", err)
 	}
@@ -39,9 +39,11 @@ func userToken(t *testing.T, client *http.Client, username string) string {
 	return "Bearer " + body["token"].(string)
 }
 
-// answerFixtures 两科目三题：A 科单选 + 多选，B 科单选（供科目过滤与分页断言）
+// answerFixtures 两科目三题：A 科单选 + 多选（分属两章节），B 科单选无章节（真题题形态），
+// 供科目过滤、分页与统计分布断言
 type answerFixtures struct {
 	subjA, subjB         model.Subject
+	chA1, chA2           model.Chapter
 	single, multi, other model.Question
 }
 
@@ -62,12 +64,19 @@ func seedAnswerFixtures(t *testing.T, db *gorm.DB) answerFixtures {
 	if err := db.Create(&f.subjB).Error; err != nil {
 		t.Fatalf("种子科目B: %v", err)
 	}
+	f.chA1 = model.Chapter{SubjectID: f.subjA.ID, Code: "P4-CH01", Name: "章节一", Sort: 1}
+	f.chA2 = model.Chapter{SubjectID: f.subjA.ID, Code: "P4-CH02", Name: "章节二", Sort: 2}
+	for _, ch := range []*model.Chapter{&f.chA1, &f.chA2} {
+		if err := db.Create(ch).Error; err != nil {
+			t.Fatalf("种子章节 %s: %v", ch.Code, err)
+		}
+	}
 	f.single = model.Question{
-		SubjectID: f.subjA.ID, Code: "P4-S01", No: 1, Type: model.QuestionTypeSingle,
+		SubjectID: f.subjA.ID, ChapterID: &f.chA1.ID, Code: "P4-S01", No: 1, Type: model.QuestionTypeSingle,
 		Stem: "A 科单选题干", Options: p4Options, Answer: []string{"A"}, Analysis: "单选解析",
 	}
 	f.multi = model.Question{
-		SubjectID: f.subjA.ID, Code: "P4-M01", No: 2, Type: model.QuestionTypeMultiple,
+		SubjectID: f.subjA.ID, ChapterID: &f.chA2.ID, Code: "P4-M01", No: 2, Type: model.QuestionTypeMultiple,
 		Stem: "A 科多选题干", Options: p4Options, Answer: []string{"A", "C"}, Analysis: "多选解析",
 	}
 	f.other = model.Question{

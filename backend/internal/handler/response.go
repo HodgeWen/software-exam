@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"software-exam/backend/internal/model"
+	"software-exam/backend/internal/repository"
 )
 
 // CodeInvalidArgument 请求参数校验失败的通用业务错误码
@@ -56,6 +57,21 @@ func toQuestionViews(questions []model.Question) []questionView {
 	views := make([]questionView, 0, len(questions))
 	for _, q := range questions {
 		views = append(views, toQuestionView(q))
+	}
+	return views
+}
+
+// toPaperQuestionViews 试卷题目项转视图：No 取卷内题号；试卷详情与开始考试共用
+func toPaperQuestionViews(items []repository.PaperQuestionItem) []questionView {
+	views := make([]questionView, 0, len(items))
+	for _, item := range items {
+		views = append(views, questionView{
+			ID:      item.Question.ID,
+			No:      item.No,
+			Type:    item.Question.Type,
+			Stem:    item.Question.Stem,
+			Options: item.Question.Options,
+		})
 	}
 	return views
 }

@@ -34,7 +34,7 @@ func run() error {
 		&model.User{},
 		&model.Subject{}, &model.Chapter{}, &model.Question{},
 		&model.Paper{}, &model.PaperQuestion{},
-		&model.AnswerRecord{}, &model.Mistake{},
+		&model.AnswerRecord{}, &model.Mistake{}, &model.Exam{}, &model.Favorite{},
 	); err != nil {
 		return fmt.Errorf("迁移数据库: %w", err)
 	}

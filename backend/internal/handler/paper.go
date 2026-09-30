@@ -35,16 +35,6 @@ func (h *BankHandler) PaperDetail(c *gin.Context) {
 		internalError(c, err)
 		return
 	}
-	questions := make([]questionView, 0, len(items))
-	for _, item := range items {
-		q := item.Question
-		questions = append(questions, questionView{
-			ID:      q.ID,
-			No:      item.No,
-			Type:    q.Type,
-			Stem:    q.Stem,
-			Options: q.Options,
-		})
-	}
+	questions := toPaperQuestionViews(items)
 	c.JSON(http.StatusOK, gin.H{"paper": paper, "questions": questions})
 }
