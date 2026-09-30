@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "backend-expert": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/roles/backend-expert/SKILL.md",
+      "computedHash": "9526196e53cb22acf4eb571b18bfa8ba37eb0fdaf6bba278989a96f8634cd58f"
+    },
+    "frontend-expert": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/roles/frontend-expert/SKILL.md",
+      "computedHash": "9b211878834fc0e430a83cfad2941291d092df5572880e453f2744234906df24"
+    },
+    "go": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/langs/go/SKILL.md",
+      "computedHash": "89946c6d0e0ca0c066a8af01cdfc2618784c62d2a1cdeb383b61f1340f8892ba"
+    },
+    "react": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/frameworks/react/SKILL.md",
+      "computedHash": "3fa08504ac2a81fdceee3de66e0e66c41fac80142b95e0418968062e5403f16d"
+    }
+  }
+}

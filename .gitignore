@@ -1,0 +1,12 @@
+.agents/cooking/
+
+# deps & build artifacts
+node_modules/
+dist/
+bin/
+
+# local data & env
+*.db
+*.sqlite
+.env
+.env.*
