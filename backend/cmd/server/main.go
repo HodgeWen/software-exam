@@ -12,6 +12,7 @@ import (
 
 	"software-exam/backend/internal/handler"
 	"software-exam/backend/internal/model"
+	"software-exam/backend/seed"
 )
 
 func main() {
@@ -29,8 +30,15 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("打开 SQLite %s: %w", dbPath, err)
 	}
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Subject{}, &model.Chapter{}, &model.Question{},
+		&model.Paper{}, &model.PaperQuestion{},
+	); err != nil {
 		return fmt.Errorf("迁移数据库: %w", err)
+	}
+	if err := seed.Import(db); err != nil {
+		return fmt.Errorf("导入种子题库: %w", err)
 	}
 
 	secret, err := jwtSecret()
