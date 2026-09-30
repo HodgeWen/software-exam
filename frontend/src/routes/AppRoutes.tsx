@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { LoginPage } from "../features/auth/LoginPage";
 import { RegisterPage } from "../features/auth/RegisterPage";
-import { ExamPlaceholderPage } from "../features/exam/ExamPlaceholderPage";
+import { ExamPage } from "../features/exam/ExamPage";
 import { ChapterPracticePage } from "../features/practice/ChapterPracticePage";
 import { RandomPracticePage } from "../features/practice/RandomPracticePage";
 import { SubjectSelectPage } from "./SubjectSelectPage";
@@ -47,12 +47,11 @@ export function AppRoutes() {
             </RequireAuth>
           }
         />
-        {/* 真题模拟入口先占位，P9 交付整卷模拟后替换 */}
         <Route
           path="/papers/:paperId/exam"
           element={
             <RequireAuth>
-              <ExamPlaceholderPage />
+              <ExamPage />
             </RequireAuth>
           }
         />
