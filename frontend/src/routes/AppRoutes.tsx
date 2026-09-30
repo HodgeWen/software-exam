@@ -2,8 +2,12 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { LoginPage } from "../features/auth/LoginPage";
 import { RegisterPage } from "../features/auth/RegisterPage";
 import { ExamPage } from "../features/exam/ExamPage";
+import { FavoritesPage } from "../features/favorites/FavoritesPage";
+import { MistakeReviewPage } from "../features/mistakes/MistakeReviewPage";
+import { MistakesPage } from "../features/mistakes/MistakesPage";
 import { ChapterPracticePage } from "../features/practice/ChapterPracticePage";
 import { RandomPracticePage } from "../features/practice/RandomPracticePage";
+import { StatsPage } from "../features/stats/StatsPage";
 import { SubjectSelectPage } from "./SubjectSelectPage";
 import { SubjectPage } from "./SubjectPage";
 import { RequireAuth } from "./RequireAuth";
@@ -52,6 +56,38 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <ExamPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/mistakes"
+          element={
+            <RequireAuth>
+              <MistakesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/mistakes/review"
+          element={
+            <RequireAuth>
+              <MistakeReviewPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <RequireAuth>
+              <FavoritesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <RequireAuth>
+              <StatsPage />
             </RequireAuth>
           }
         />

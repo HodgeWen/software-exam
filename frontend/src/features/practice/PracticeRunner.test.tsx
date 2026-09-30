@@ -141,4 +141,31 @@ describe("PracticeRunner 练习流程", () => {
     expect(screen.queryByText("回答正确")).toBeNull();
     expect(screen.queryByText("练习完成")).toBeNull();
   });
+
+  it("收藏本题：POST /favorites，成功后按钮变为已收藏并禁用", async () => {
+    const calls: Array<[string, RequestInit | undefined]> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        calls.push([url, init]);
+        if (String(url).endsWith("/api/v1/favorites")) return new Response(null, { status: 204 });
+        return new Response(JSON.stringify({ correct: false, answer: ["B"], analysis: "解析" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+    renderRunner();
+
+    fireEvent.click(screen.getByRole("button", { name: "收藏本题" }));
+    expect(await screen.findByText("已收藏")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "已收藏" }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+
+    const favorite = calls.find(([u]) => String(u).endsWith("/api/v1/favorites"));
+    expect(favorite).toBeTruthy();
+    expect(favorite?.[1]?.method).toBe("POST");
+    expect(favorite?.[1]?.body).toBe(JSON.stringify({ question_id: 11 }));
+  });
 });

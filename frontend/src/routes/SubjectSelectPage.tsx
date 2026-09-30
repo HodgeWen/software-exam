@@ -14,6 +14,15 @@ export function SubjectSelectPage() {
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">软考刷题</h1>
         <div className="flex items-center gap-3 text-sm">
+          <Link to="/mistakes" className="text-indigo-600 hover:underline">
+            错题本
+          </Link>
+          <Link to="/favorites" className="text-indigo-600 hover:underline">
+            收藏
+          </Link>
+          <Link to="/stats" className="text-indigo-600 hover:underline">
+            统计
+          </Link>
           <span className="text-gray-600">{user?.username}</span>
           <button
             type="button"

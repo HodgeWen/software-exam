@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { submitAnswer } from "../../api/bank";
+import { addFavorite } from "../../api/favorites";
 import type { Question } from "../../api/bank";
 import { QuestionCard } from "../../components/QuestionCard";
 import { usePracticeStore } from "../../stores/practice";
@@ -39,6 +40,13 @@ export function PracticeRunner({ title, questions }: PracticeRunnerProps) {
     },
   });
 
+  const favoriteMutation = useMutation({
+    mutationFn: (q: Question) => addFavorite(q.id),
+  });
+  // 已收藏状态只对本次收藏的那一题生效，切到下一题按钮回到初始态
+  const favorited =
+    !!question && favoriteMutation.isSuccess && favoriteMutation.variables?.id === question.id;
+
   // 会话尚未与本批题目同步时先不渲染，避免闪现上一次练习的内容
   if (sessionQuestions !== questions) return null;
 
@@ -74,27 +82,40 @@ export function PracticeRunner({ title, questions }: PracticeRunnerProps) {
         onChange={setSelected}
       />
       <div>
-        {result ? (
+        <div className="flex flex-wrap items-center gap-3">
+          {result ? (
+            <button
+              type="button"
+              onClick={next}
+              className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              {index + 1 === total ? "完成练习" : "下一题"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={selected.length === 0 || submitMutation.isPending}
+              onClick={() => submitMutation.mutate(question)}
+              className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {submitMutation.isPending ? "判分中…" : "提交答案"}
+            </button>
+          )}
           <button
             type="button"
-            onClick={next}
-            className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            disabled={favoriteMutation.isPending || favorited}
+            onClick={() => favoriteMutation.mutate(question)}
+            className="rounded border border-indigo-300 px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
           >
-            {index + 1 === total ? "完成练习" : "下一题"}
+            {favorited ? "已收藏" : favoriteMutation.isPending ? "收藏中…" : "收藏本题"}
           </button>
-        ) : (
-          <button
-            type="button"
-            disabled={selected.length === 0 || submitMutation.isPending}
-            onClick={() => submitMutation.mutate(question)}
-            className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {submitMutation.isPending ? "判分中…" : "提交答案"}
-          </button>
-        )}
-        {submitMutation.isError && (
+        </div>
+        {(submitMutation.isError || favoriteMutation.isError) && (
           <p role="alert" className="mt-2 text-sm text-red-600">
-            {(submitMutation.error as Error).message}
+            {
+              ((submitMutation.isError ? submitMutation.error : favoriteMutation.error) as Error)
+                .message
+            }
           </p>
         )}
       </div>
