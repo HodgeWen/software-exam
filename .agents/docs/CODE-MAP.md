@@ -1,6 +1,6 @@
 # 代码地图
 
-> `backend/`（含 `seed/`）已创建；`frontend/` 已创建底座与账号页（`routes`/`features/auth`/`api`/`stores`），其余目录随后续阶段落地。
+> `backend/`（含 `seed/`）已创建；`frontend/` 已落地账号页与科目选择/章节练习/随机练习（`routes`/`features/auth`/`features/practice`/`components`/`api`/`stores`），真题模拟为路由占位页，其余目录随后续阶段落地。
 
 ## 树
 

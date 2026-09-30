@@ -1,10 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { LoginPage } from "../features/auth/LoginPage";
 import { RegisterPage } from "../features/auth/RegisterPage";
-import { HomePage } from "./HomePage";
+import { ExamPlaceholderPage } from "../features/exam/ExamPlaceholderPage";
+import { ChapterPracticePage } from "../features/practice/ChapterPracticePage";
+import { RandomPracticePage } from "../features/practice/RandomPracticePage";
+import { SubjectSelectPage } from "./SubjectSelectPage";
+import { SubjectPage } from "./SubjectPage";
 import { RequireAuth } from "./RequireAuth";
 
-// 路由树根组件：P8 起在 / 下挂科目选择与各练习/考试页
+// 路由树根组件：公开页仅登录/注册，其余一律经 RequireAuth 守卫
 export function AppRoutes() {
   return (
     <BrowserRouter>
@@ -15,7 +19,40 @@ export function AppRoutes() {
           path="/"
           element={
             <RequireAuth>
-              <HomePage />
+              <SubjectSelectPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/subjects/:subjectId"
+          element={
+            <RequireAuth>
+              <SubjectPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/subjects/:subjectId/chapters/:chapterId"
+          element={
+            <RequireAuth>
+              <ChapterPracticePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/subjects/:subjectId/random"
+          element={
+            <RequireAuth>
+              <RandomPracticePage />
+            </RequireAuth>
+          }
+        />
+        {/* 真题模拟入口先占位，P9 交付整卷模拟后替换 */}
+        <Route
+          path="/papers/:paperId/exam"
+          element={
+            <RequireAuth>
+              <ExamPlaceholderPage />
             </RequireAuth>
           }
         />
