@@ -19,6 +19,8 @@ const mistakeRow = {
       { key: "B", text: "选项B" },
     ],
   },
+  subject_name: "软件设计师",
+  chapter_name: "计算机系统基础知识",
   wrong_count: 2,
   last_wrong_at: "2026-09-01T10:00:00Z",
 };
@@ -78,11 +80,12 @@ afterEach(() => {
 });
 
 describe("MistakesPage 错题本列表", () => {
-  it("展示错题行（题型/错误次数/题干）与分页信息", async () => {
+  it("展示错题行（题型/科目/知识点/错误次数/题干）与分页信息", async () => {
     renderPage();
 
     expect(await screen.findByText("错题题干")).toBeTruthy();
     expect(screen.getByText("单选")).toBeTruthy();
+    expect(screen.getByText("计算机系统基础知识")).toBeTruthy();
     expect(screen.getByText("错 2 次")).toBeTruthy();
     expect(screen.getByText("第 1 / 1 页 · 共 1 条")).toBeTruthy();
     expect((screen.getByRole("button", { name: "上一页" }) as HTMLButtonElement).disabled).toBe(
@@ -90,11 +93,11 @@ describe("MistakesPage 错题本列表", () => {
     );
   });
 
-  it("按科目过滤：切换后请求携带 subject_id 并回到第一页", async () => {
+  it("按科目过滤：点击标签后请求携带 subject_id 并回到第一页", async () => {
     renderPage();
     await screen.findByText("错题题干");
 
-    fireEvent.change(screen.getByLabelText("按科目过滤"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "软件设计师" }));
 
     await waitFor(() => expect(mistakeQueries.at(-1)).toContain("subject_id=1"));
     expect(mistakeQueries.at(-1)).toContain("page=1");

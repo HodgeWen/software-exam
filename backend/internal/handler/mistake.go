@@ -24,9 +24,11 @@ type listMistakesQuery struct {
 	PageSize  int  `form:"page_size,default=20"`
 }
 
-// mistakeItem 错题本列表行：题目走对外视图，正确答案与解析经提交判分接口返回
+// mistakeItem 错题本列表行：题目走对外视图，附科目/知识点归属；正确答案与解析经提交判分接口返回
 type mistakeItem struct {
 	Question    questionView `json:"question"`
+	SubjectName string       `json:"subject_name"`
+	ChapterName string       `json:"chapter_name"`
 	WrongCount  int          `json:"wrong_count"`
 	LastWrongAt time.Time    `json:"last_wrong_at"`
 }
@@ -47,6 +49,8 @@ func (h *MistakeHandler) List(c *gin.Context) {
 	for i, row := range rows {
 		items[i] = mistakeItem{
 			Question:    toQuestionView(row.Question),
+			SubjectName: row.SubjectName,
+			ChapterName: row.ChapterName,
 			WrongCount:  row.Mistake.WrongCount,
 			LastWrongAt: row.Mistake.LastWrongAt,
 		}

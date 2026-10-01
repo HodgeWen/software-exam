@@ -6,6 +6,8 @@ import type { Question } from "./bank";
 
 export interface MistakeItem {
   question: Question;
+  subject_name: string;
+  chapter_name: string;
   wrong_count: number;
   last_wrong_at: string;
 }
