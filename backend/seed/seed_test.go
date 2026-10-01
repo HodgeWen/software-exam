@@ -93,25 +93,43 @@ func TestImportIdempotent(t *testing.T) {
 	}
 }
 
-// TestSeedContent 校验种子内容完整性：软考设计师科目的章节、练习题、真题数量与题型覆盖，
-// 并逐题校验答案合法（在选项内、单选恰 1 个、多选 ≥2 个）且有解析
+// TestSeedContent 校验种子内容完整性：各科目的章节、练习题、真题数量下限，
+// 并逐题校验答案合法（在选项内、单选恰 1 个、多选 ≥2 个）且有解析、题型覆盖单选与多选
 func TestSeedContent(t *testing.T) {
 	db := newTestDB(t)
 	if err := Import(db); err != nil {
 		t.Fatalf("导入: %v", err)
 	}
 
+	specs := []struct {
+		code                                string
+		minChapters, minPractice, minPapers int64
+	}{
+		{"soft-designer", 4, 40, 1},
+		{"sys-architect", 8, 80, 2},
+		{"it-pm", 7, 70, 2},
+	}
+	for _, spec := range specs {
+		t.Run(spec.code, func(t *testing.T) {
+			checkSubjectContent(t, db, spec.code, spec.minChapters, spec.minPractice, spec.minPapers)
+		})
+	}
+}
+
+func checkSubjectContent(t *testing.T, db *gorm.DB, code string, minChapters, minPractice, minPapers int64) {
+	t.Helper()
+
 	var subject model.Subject
-	if err := db.Where("code = ?", "soft-designer").First(&subject).Error; err != nil {
-		t.Fatalf("查软件设计师科目: %v", err)
+	if err := db.Where("code = ?", code).First(&subject).Error; err != nil {
+		t.Fatalf("查科目 %s: %v", code, err)
 	}
 
 	var chapters int64
 	if err := db.Model(&model.Chapter{}).Where("subject_id = ?", subject.ID).Count(&chapters).Error; err != nil {
 		t.Fatalf("统计章节数: %v", err)
 	}
-	if chapters < 4 {
-		t.Errorf("章节数 %d < 4", chapters)
+	if chapters < minChapters {
+		t.Errorf("章节数 %d < %d", chapters, minChapters)
 	}
 
 	var practiceCount int64
@@ -119,16 +137,16 @@ func TestSeedContent(t *testing.T) {
 		Count(&practiceCount).Error; err != nil {
 		t.Fatalf("统计章节练习题数: %v", err)
 	}
-	if practiceCount < 40 {
-		t.Errorf("章节练习题数 %d < 40", practiceCount)
+	if practiceCount < minPractice {
+		t.Errorf("章节练习题数 %d < %d", practiceCount, minPractice)
 	}
 
 	var papers []model.Paper
 	if err := db.Where("subject_id = ?", subject.ID).Find(&papers).Error; err != nil {
 		t.Fatalf("查试卷: %v", err)
 	}
-	if len(papers) < 1 {
-		t.Fatal("真题试卷数 < 1")
+	if int64(len(papers)) < minPapers {
+		t.Fatalf("真题试卷数 %d < %d", len(papers), minPapers)
 	}
 	for _, p := range papers {
 		var n int64

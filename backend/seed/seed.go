@@ -14,6 +14,12 @@ import (
 //go:embed software_designer.json
 var softwareDesigner []byte
 
+//go:embed sys_architect.json
+var sysArchitect []byte
+
+//go:embed it_project_manager.json
+var itProjectManager []byte
+
 type seedDoc struct {
 	Subjects []seedSubject `json:"subjects"`
 }
@@ -66,8 +72,12 @@ func Import(db *gorm.DB) error {
 
 func load() (seedDoc, error) {
 	var doc seedDoc
-	if err := json.Unmarshal(softwareDesigner, &doc); err != nil {
-		return doc, fmt.Errorf("解析种子 JSON: %w", err)
+	for _, b := range [][]byte{softwareDesigner, sysArchitect, itProjectManager} {
+		var d seedDoc
+		if err := json.Unmarshal(b, &d); err != nil {
+			return doc, fmt.Errorf("解析种子 JSON: %w", err)
+		}
+		doc.Subjects = append(doc.Subjects, d.Subjects...)
 	}
 	return doc, nil
 }
