@@ -1,6 +1,6 @@
 # 代码地图
 
-> `backend/`（含 `seed/`）与 `frontend/` 全部模块均已落地：账号、科目选择/章节练习/随机练习、真题模拟、错题本（列表+重刷）、收藏、统计。
+> `backend/`（含 `seed/`）与 `frontend/` 全部模块均已落地：账号、科目选择/章节练习/随机练习/背题模式、真题模拟、错题本（列表+重刷）、收藏、统计。
 
 ## 树
 
@@ -11,6 +11,7 @@ frontend/                 # React SPA（Vite+ 工具链）
     features/             # 按业务域拆分（域内组件/hooks/类型就近放）
       auth/               # 注册/登录、token 管理
       practice/           # 顺序/随机刷题、逐题判分
+      browse/             # 背题模式：题目+答案+解析逐题浏览
       exam/               # 整卷模拟：计时、答题卡、交卷评分
       mistakes/           # 错题本与重刷
       favorites/          # 收藏
@@ -22,7 +23,7 @@ frontend/                 # React SPA（Vite+ 工具链）
 backend/                  # Go REST API（Gin + GORM + SQLite）
   cmd/server/             # main 入口：装配 DB、路由、中间件
   internal/
-    handler/              # Gin 处理器：参数校验、响应
+    handler/              # Gin 处理器：参数校验、响应、SPA 静态托管（生产）
     service/              # 业务：判分、错题、收藏、统计、JWT
     repository/           # GORM 数据访问
     model/                # 表模型：user/subject/question/paper/answer_record/mistake/favorite…
@@ -40,7 +41,7 @@ backend/                  # Go REST API（Gin + GORM + SQLite）
 | API 客户端 | `frontend/src/api` | 封装全部后端调用 | `client.ts` |
 | 客户端状态 | `frontend/src/stores` | zustand：登录态、练习会话、考试作答 | `auth.ts` |
 | API 服务 | `backend/cmd/server` | 进程入口、路由装配 | `main.go` |
-| 接口层 | `backend/internal/handler` | REST 端点 | 各 handler 文件 |
+| 接口层 | `backend/internal/handler` | REST 端点、SPA 静态托管（生产） | 各 handler 文件 |
 | 业务层 | `backend/internal/service` | 判分/错题/统计/JWT | 各 service 文件 |
 | 数据层 | `backend/internal/repository` | GORM CRUD | 各 repository 文件 |
 | 表模型 | `backend/internal/model` | GORM 表模型：user/subject/question/paper/exam/mistake/favorite 等 | 各 model 文件 |
@@ -63,5 +64,5 @@ graph TD
 
 ## 关键路径
 
-- 启动：`backend/cmd/server` 打开 SQLite → AutoMigrate → 幂等种子导入 → 注册中间件与路由 → 监听；前端 `vp dev` 起 Vite 开发服务器并代理 `/api` 到后端
+- 启动：`backend/cmd/server` 打开 SQLite → AutoMigrate → 幂等种子导入 → 注册中间件与路由 → 监听（生产设 `EXAM_STATIC_DIR` 时同进程托管前端 dist，Docker 单容器交付）；前端 `vp dev` 起 Vite 开发服务器并代理 `/api` 到后端
 - 答题请求：routes → features → api →（HTTP `/api/v1`）→ middleware(JWT) → handler → service(判分/沉淀错题) → repository → SQLite
