@@ -38,7 +38,7 @@ func newTestServer(t *testing.T) (*httptest.Server, *gorm.DB) {
 	if err := db.AutoMigrate(&model.User{}); err != nil {
 		t.Fatalf("迁移: %v", err)
 	}
-	ts := httptest.NewTestServer(t, NewRouter(db, itSecret))
+	ts := httptest.NewTestServer(t, NewRouter(db, itSecret, ""))
 	return ts, db
 }
 

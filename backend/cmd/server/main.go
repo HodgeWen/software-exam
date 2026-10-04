@@ -48,8 +48,9 @@ func run() error {
 	}
 
 	addr := ":" + envOr("EXAM_PORT", "8080")
-	slog.Info("listening", "addr", addr, "db", dbPath)
-	return handler.NewRouter(db, secret).Run(addr)
+	staticDir := envOr("EXAM_STATIC_DIR", "")
+	slog.Info("listening", "addr", addr, "db", dbPath, "static", staticDir)
+	return handler.NewRouter(db, secret, staticDir).Run(addr)
 }
 
 // jwtSecret 优先读环境变量；未配置则生成进程内随机密钥（安全默认，代价是重启后旧 token 失效）

@@ -1,0 +1,15 @@
+# 依赖与产物在镜像内重新构建,本地缓存不进上下文
+**/node_modules
+frontend/dist
+backend/**/*.db
+
+# 运行数据与仓库元数据
+data
+.git
+.agents
+skills-lock.json
+AGENTS.md
+DEPLOY.md
+
+# 题库扩充的临时原料目录(合并完成后也不应进镜像)
+backend/seed/_extra

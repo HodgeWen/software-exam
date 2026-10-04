@@ -9,8 +9,9 @@ import (
 	"software-exam/backend/internal/service"
 )
 
-// NewRouter 装配中间件与全部路由；集成测试用同一入口挂内存 SQLite
-func NewRouter(db *gorm.DB, jwtSecret []byte) *gin.Engine {
+// NewRouter 装配中间件与全部路由；集成测试用同一入口挂内存 SQLite。
+// staticDir 非空时托管前端 SPA 静态资源（生产部署形态），空则只提供 API（开发期走 Vite 代理）
+func NewRouter(db *gorm.DB, jwtSecret []byte, staticDir string) *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.Recover(), middleware.Logger(), middleware.CORS())
 
@@ -62,6 +63,10 @@ func NewRouter(db *gorm.DB, jwtSecret []byte) *gin.Engine {
 	protected.GET("/favorites", favorites.List)
 	protected.DELETE("/favorites/:questionId", favorites.Remove)
 	protected.GET("/stats", stats.Summary)
+
+	if staticDir != "" {
+		serveStatic(r, staticDir)
+	}
 
 	return r
 }

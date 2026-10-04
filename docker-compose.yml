@@ -1,0 +1,23 @@
+# 一键部署:docker compose up -d --build
+# 数据持久化在 ./data(SQLite 单文件),备份直接拷贝该目录
+services:
+  exam:
+    # 优先拉 CI 发布的镜像(docker compose pull),也可服务器自构建(up -d --build)
+    build: .
+    image: ghcr.io/hodgewen/software-exam:latest
+    container_name: software-exam
+    ports:
+      - "${HOST_PORT:-8080}:8080" # 宿主机端口,改这里即可
+    environment:
+      # JWT 签名密钥:建议在 .env 或环境变量里覆盖默认值,
+      # 固定后重启不丢登录态;泄露则任何人可伪造 token
+      EXAM_JWT_SECRET: ${EXAM_JWT_SECRET:-change-me-before-production}
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
