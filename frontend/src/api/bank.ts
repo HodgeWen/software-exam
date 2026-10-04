@@ -72,3 +72,21 @@ export function fetchRandomQuestions(subjectId: number) {
 export function submitAnswer(questionId: number, selected: string[]) {
   return api.post<AnswerResult>("/answers", { question_id: questionId, selected });
 }
+
+// 背题模式题目视图：在 Question 基础上附带正确答案与解析（reveal=1 接口专用）
+export interface RevealedQuestion extends Question {
+  answer: string[];
+  analysis: string;
+}
+
+// 背题取题：按章节顺序返回带正确答案与解析的题目
+export function fetchChapterQuestionsRevealed(subjectId: number, chapterId: number) {
+  return api.get<{ questions: RevealedQuestion[] }>(
+    `/subjects/${subjectId}/chapters/${chapterId}/questions?reveal=1`,
+  );
+}
+
+// 背题取题：整卷按卷内题号返回带正确答案与解析的题目
+export function fetchPaperQuestionsRevealed(paperId: number) {
+  return api.get<{ paper: Paper; questions: RevealedQuestion[] }>(`/papers/${paperId}?reveal=1`);
+}

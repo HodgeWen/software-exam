@@ -353,6 +353,87 @@ func TestPaperListAndDetail(t *testing.T) {
 	}
 }
 
+// TestRevealQuestions 背题模式取题：reveal=1 附带答案与解析且与库内一致，
+// 默认（无 reveal）与整卷原始响应仍不泄漏；reveal 接口同样要求 JWT
+func TestRevealQuestions(t *testing.T) {
+	ts, db := newBankTestServer(t)
+	client := ts.Client()
+	auth := bankToken(t, client)
+
+	var subject model.Subject
+	if err := db.Where("code = ?", "soft-designer").First(&subject).Error; err != nil {
+		t.Fatalf("查种子科目: %v", err)
+	}
+	var chapter model.Chapter
+	if err := db.Where("subject_id = ? AND code = ?", subject.ID, "computer-system").First(&chapter).Error; err != nil {
+		t.Fatalf("查种子章节: %v", err)
+	}
+	var want []model.Question
+	if err := db.Where("chapter_id = ?", chapter.ID).Order("id").Find(&want).Error; err != nil || len(want) == 0 {
+		t.Fatalf("查章节题目: %v", err)
+	}
+
+	plainURL := itBaseURL + "/api/v1/subjects/" + itoa(subject.ID) + "/chapters/" + itoa(chapter.ID) + "/questions"
+	status, body := doJSON(t, client, http.MethodGet, plainURL, "", auth)
+	if status != http.StatusOK {
+		t.Fatalf("默认章节取题 status = %d, body %v", status, body)
+	}
+	assertNoAnswerLeak(t, body["questions"].([]any))
+
+	revealURL := plainURL + "?reveal=1"
+	status, body = doJSON(t, client, http.MethodGet, revealURL, "", auth)
+	if status != http.StatusOK {
+		t.Fatalf("背题章节取题 status = %d, body %v", status, body)
+	}
+	items := body["questions"].([]any)
+	if len(items) != len(want) {
+		t.Fatalf("背题题数 = %d, want %d", len(items), len(want))
+	}
+	for i, item := range items {
+		q := item.(map[string]any)
+		if q["id"].(float64) != float64(want[i].ID) {
+			t.Fatalf("背题第 %d 题顺序不符: %v", i, q["id"])
+		}
+		answer, ok := q["answer"].([]any)
+		if !ok || len(answer) == 0 || len(answer) != len(want[i].Answer) {
+			t.Fatalf("背题答案缺失或不符: %v", q)
+		}
+		if q["analysis"] != want[i].Analysis || q["analysis"] == "" {
+			t.Fatalf("背题解析缺失或不符: %v", q)
+		}
+	}
+
+	if status, body = doJSON(t, client, http.MethodGet, revealURL, "", ""); status != http.StatusUnauthorized {
+		t.Fatalf("背题取题无 token status = %d, body %v", status, body)
+	}
+
+	// 整卷背题：题号顺序保持，且每题带答案与解析
+	var paper model.Paper
+	if err := db.Where("subject_id = ?", subject.ID).Order("id").First(&paper).Error; err != nil {
+		t.Fatalf("查种子试卷: %v", err)
+	}
+	status, body = doJSON(t, client, http.MethodGet, itBaseURL+"/api/v1/papers/"+itoa(paper.ID)+"?reveal=1", "", auth)
+	if status != http.StatusOK {
+		t.Fatalf("背题整卷 status = %d, body %v", status, body)
+	}
+	paperItems, _ := body["questions"].([]any)
+	if len(paperItems) == 0 {
+		t.Fatalf("背题整卷为空: %v", body)
+	}
+	for i, item := range paperItems {
+		q := item.(map[string]any)
+		if q["no"].(float64) != float64(i+1) {
+			t.Fatalf("背题整卷题号应从 1 连续: got[%d] = %v", i, q["no"])
+		}
+		if answer, ok := q["answer"].([]any); !ok || len(answer) == 0 {
+			t.Fatalf("背题整卷答案缺失: %v", q)
+		}
+		if q["analysis"] == "" {
+			t.Fatalf("背题整卷解析缺失: %v", q)
+		}
+	}
+}
+
 // itoa uint 转字符串的小助手
 func itoa(v uint) string {
 	return strconv.FormatUint(uint64(v), 10)

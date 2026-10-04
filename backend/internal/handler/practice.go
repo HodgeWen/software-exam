@@ -9,8 +9,9 @@ import (
 	"software-exam/backend/internal/service"
 )
 
-// ChapterQuestions GET /api/v1/subjects/:id/chapters/:chapterId/questions（鉴权）
-// 顺序取题：按题目稳定顺序（ID）返回该章节全部题目
+// ChapterQuestions GET /api/v1/subjects/:id/chapters/:chapterId/questions?reveal=（鉴权）
+// 顺序取题：按题目稳定顺序（ID）返回该章节全部题目；
+// reveal=1 时走背题模式视图，附带正确答案与解析
 func (h *BankHandler) ChapterQuestions(c *gin.Context) {
 	subjectID, ok := parseUintParam(c, "id")
 	if !ok {
@@ -29,6 +30,10 @@ func (h *BankHandler) ChapterQuestions(c *gin.Context) {
 	case err != nil:
 		internalError(c, err)
 	default:
+		if c.Query("reveal") == "1" {
+			c.JSON(http.StatusOK, gin.H{"questions": toQuestionDetailViews(questions)})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{"questions": toQuestionViews(questions)})
 	}
 }

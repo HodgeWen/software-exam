@@ -61,6 +61,44 @@ func toQuestionViews(questions []model.Question) []questionView {
 	return views
 }
 
+// questionDetailView 背题模式题目视图：在 questionView 基础上附正确答案与解析，
+// 仅供 reveal=1 的取题接口使用；练习/考试取题仍走无答案视图
+type questionDetailView struct {
+	questionView
+	Answer   []string `json:"answer"`
+	Analysis string   `json:"analysis"`
+}
+
+func toQuestionDetailViews(questions []model.Question) []questionDetailView {
+	views := make([]questionDetailView, 0, len(questions))
+	for _, q := range questions {
+		views = append(views, questionDetailView{
+			questionView: toQuestionView(q),
+			Answer:       q.Answer,
+			Analysis:     q.Analysis,
+		})
+	}
+	return views
+}
+
+func toPaperQuestionDetailViews(items []repository.PaperQuestionItem) []questionDetailView {
+	views := make([]questionDetailView, 0, len(items))
+	for _, item := range items {
+		views = append(views, questionDetailView{
+			questionView: questionView{
+				ID:      item.Question.ID,
+				No:      item.No,
+				Type:    item.Question.Type,
+				Stem:    item.Question.Stem,
+				Options: item.Question.Options,
+			},
+			Answer:   item.Question.Answer,
+			Analysis: item.Question.Analysis,
+		})
+	}
+	return views
+}
+
 // toPaperQuestionViews 试卷题目项转视图：No 取卷内题号；试卷详情与开始考试共用
 func toPaperQuestionViews(items []repository.PaperQuestionItem) []questionView {
 	views := make([]questionView, 0, len(items))

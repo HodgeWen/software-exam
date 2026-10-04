@@ -37,13 +37,24 @@ export function SubjectPage() {
           ) : (
             <ul className="flex flex-col gap-2">
               {chapters.map((c) => (
-                <li key={c.id}>
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 rounded border border-gray-200 px-4 py-3 text-sm hover:border-indigo-400 hover:bg-indigo-50"
+                >
+                  <Link to={`/subjects/${sid}/chapters/${c.id}`} className="min-w-0 flex-1">
+                    {c.name}
+                  </Link>
+                  <Link
+                    to={`/subjects/${sid}/chapters/${c.id}/browse`}
+                    className="shrink-0 text-gray-500 hover:text-indigo-600"
+                  >
+                    背题
+                  </Link>
                   <Link
                     to={`/subjects/${sid}/chapters/${c.id}`}
-                    className="flex items-center justify-between rounded border border-gray-200 px-4 py-3 text-sm hover:border-indigo-400 hover:bg-indigo-50"
+                    className="shrink-0 text-indigo-600"
                   >
-                    <span>{c.name}</span>
-                    <span className="text-indigo-600">去练习</span>
+                    去练习
                   </Link>
                 </li>
               ))}
@@ -69,16 +80,22 @@ export function SubjectPage() {
           ) : (
             <ul className="flex flex-col gap-2">
               {papers.map((p) => (
-                <li key={p.id}>
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 rounded border border-gray-200 px-4 py-3 text-sm hover:border-indigo-400 hover:bg-indigo-50"
+                >
+                  <Link to={`/papers/${p.id}/exam`} className="min-w-0 flex-1">
+                    {p.name}
+                    <span className="ml-2 text-xs text-gray-500">{p.duration_minutes} 分钟</span>
+                  </Link>
                   <Link
-                    to={`/papers/${p.id}/exam`}
-                    className="flex items-center justify-between rounded border border-gray-200 px-4 py-3 text-sm hover:border-indigo-400 hover:bg-indigo-50"
+                    to={`/papers/${p.id}/browse`}
+                    className="shrink-0 text-gray-500 hover:text-indigo-600"
                   >
-                    <span>
-                      {p.name}
-                      <span className="ml-2 text-xs text-gray-500">{p.duration_minutes} 分钟</span>
-                    </span>
-                    <span className="text-indigo-600">开始考试</span>
+                    学习模式
+                  </Link>
+                  <Link to={`/papers/${p.id}/exam`} className="shrink-0 text-indigo-600">
+                    开始考试
                   </Link>
                 </li>
               ))}

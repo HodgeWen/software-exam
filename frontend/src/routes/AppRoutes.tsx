@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { LoginPage } from "../features/auth/LoginPage";
 import { RegisterPage } from "../features/auth/RegisterPage";
+import { ChapterBrowsePage } from "../features/browse/ChapterBrowsePage";
+import { PaperBrowsePage } from "../features/browse/PaperBrowsePage";
 import { ExamPage } from "../features/exam/ExamPage";
 import { FavoritesPage } from "../features/favorites/FavoritesPage";
 import { MistakeReviewPage } from "../features/mistakes/MistakeReviewPage";
@@ -44,10 +46,26 @@ export function AppRoutes() {
           }
         />
         <Route
+          path="/subjects/:subjectId/chapters/:chapterId/browse"
+          element={
+            <RequireAuth>
+              <ChapterBrowsePage />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/subjects/:subjectId/random"
           element={
             <RequireAuth>
               <RandomPracticePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/papers/:paperId/browse"
+          element={
+            <RequireAuth>
+              <PaperBrowsePage />
             </RequireAuth>
           }
         />
