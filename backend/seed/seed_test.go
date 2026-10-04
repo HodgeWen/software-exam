@@ -105,9 +105,9 @@ func TestSeedContent(t *testing.T) {
 		code                                string
 		minChapters, minPractice, minPapers int64
 	}{
-		{"soft-designer", 4, 40, 1},
-		{"sys-architect", 8, 80, 2},
-		{"it-pm", 7, 70, 2},
+		{"soft-designer", 10, 100, 2},
+		{"sys-architect", 17, 170, 4},
+		{"it-pm", 14, 140, 4},
 	}
 	for _, spec := range specs {
 		t.Run(spec.code, func(t *testing.T) {
